@@ -25,21 +25,21 @@ class Race_model extends CI_Model {
             );
 
             foreach ($races as $race) {
-       
+                $advanceTime = $this->advanceTime;
                 foreach ($race->horses as $horse) {
-                    if ($horse->speedWithJokey * $this->advanceTime + $horse->distance > $this->trackLength){
-                        $this->advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
+                    if ($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){ //if passas finish line shorter than 10 seconds
+                        $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
                         $race->in_progress = 0;
-                        //$this->race->winner
+                      
                     }
                     
 
                 }
                 foreach ($race->horses as $horse) {
-                    $horse->distance += $horse->speedWithJokey * $this->advanceTime;
+                    $horse->distance += $horse->speedWithJokey * $advanceTime;
 
                 }
-                $race->time += $this->advanceTime;
+                $race->time += $advanceTime;
               
                 
             }
