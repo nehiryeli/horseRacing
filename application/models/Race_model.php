@@ -55,8 +55,12 @@ class Race_model extends CI_Model {
                                 //$horse->distance = $this->trackLength;
                                 //$race->horsesAtFinish++; 
                             }
-
-                            $horse->enduranceMeters-= $this->horseSpeed * $advanceTime;
+                            if($horse->enduranceMeters){
+                                $horse->enduranceMeters-= $this->horseSpeed * $advanceTime;
+                                if ($horse->enduranceMeters< 0)
+                                    $horse->enduranceMeters = 0;
+                            }
+                            
 
                         }
                         print_r($race->horsesAtFinish);
@@ -109,10 +113,10 @@ class Race_model extends CI_Model {
 
         public function create_race($horses){
             $count = $this->get_races(array(
-               'where' => array(
+             'where' => array(
                 'in_progress' => true
             ),
-               'count' => true)
+             'count' => true)
         );
 
             if($count>=3){
@@ -180,17 +184,20 @@ class Race_model extends CI_Model {
             $races =  $this->get_races(array(
                 'where' => array(
                     'in_progress' => false)
-                )
-            );
-            $fastest = $races[0]->horses[0];
-            foreach ($races as $race) {
-                foreach ($race->horses as $horse) {
-                    if($horse->raceCompleteTiming < $fastest->raceCompleteTiming)
-                        $fastest = $horse;
+            )
+        );
+            if ($races) {
+                $fastest = $races[0]->horses[0];
+                foreach ($races as $race) {
+                    foreach ($race->horses as $horse) {
+                        if($horse->raceCompleteTiming < $fastest->raceCompleteTiming)
+                            $fastest = $horse;
+                    }
+                    
                 }
-                
+                return $fastest;
             }
-            return $fastest;
+            
         }
 
         public function sort_distance($a, $b){

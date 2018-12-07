@@ -1,11 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-class Horse{
-        public $str;
-        public $speed;
-        public $endurance;
 
-
-}
 class Horse_model extends CI_Model {
 
 
