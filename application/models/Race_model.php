@@ -3,7 +3,7 @@
 class Race_model extends CI_Model {
 
 
-    public $data;
+        public $data;
         public $trackLength = 1500; // meters 
         public $advanceTime = 10; //seconds
         public $raceLimit = 3; // concurrent race limit
@@ -26,10 +26,30 @@ class Race_model extends CI_Model {
 
             foreach ($races as $race) {
                 $advanceTime = $this->advanceTime;
+
                 foreach ($race->horses as $horse) {
+                    if($horse->distance < $this->trackLength){
+                        if($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){
+                            $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
+                            $horse->raceCompleteTiming = $race->time+$advanceTime;
+                            $horse->distance += $horse->speedWithJokey * $advanceTime;
+
+                        }else{ 
+                            $advanceTime = $this->advanceTime;
+                            $horse->distance += $horse->speedWithJokey * $advanceTime;
+
+                        }
+
+                    }else{
+
+                    }
+                }
+                $race->time+= $this->advanceTime;
+                /*foreach ($race->horses as $horse) {
                     if ($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){ //if passas finish line shorter than 10 seconds
                         $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
-                        $race->in_progress = 0;
+                        $horse->timeToComplete = $advanceTime;
+                        //$race->in_progress = 0;
                       
                     }
                     
@@ -41,7 +61,7 @@ class Race_model extends CI_Model {
                 }
                 $race->time += $advanceTime;
               
-                
+                */
             }
 
             $this->update_races($races);
