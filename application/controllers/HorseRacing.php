@@ -18,11 +18,49 @@ class HorseRacing extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index()
+
+	public function __construct()
 	{
+		parent::__construct();
 		$this->load->model('horse_model');
-		echo "<pre>";
-		var_dump($this->horse_model->create_horses(8));
-		$this->load->view('welcome_message');
+		$this->load->model('race_model');
+		$this->data = new stdClass();
+		$this->output->enable_profiler(TRUE);
+
+	}
+	public function index(){
+		
+		$this->data->activeRaces = $this->race_model->get_races(array(
+                'where' => array(
+                    'in_progress' => true)
+                )
+            );
+
+		$this->data->lastFiveRace = $this->race_model->get_races(array(
+				'where' => array(
+					'in_progress' => false
+				),
+				'limit' => 5
+			)
+		);
+
+		$this->load->view('races', $this->data);
+	}
+
+	public function create(){
+		
+
+
+		$horses = ($this->horse_model->create_horses(8));
+		
+		$this->race_model->create_race($horses);
+		redirect('/');
+	}
+
+
+	public function advance(){
+		$this->race_model->advance_race();
+		redirect('/');
+
 	}
 }
