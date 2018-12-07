@@ -39,10 +39,12 @@ class Horse_model extends CI_Model {
                         $horse->no = $i;
                         $horse->strength = rand(10,100)/10;
                         $horse->speed = $this->baseSpeed + rand(10,100)/10;
-                        $horse->speedWithJokey = $horse->speed - $this->jokeyEffect * (1-($horse->strength *8/100));
+                        $horse->speedWithJokey = number_format($horse->speed - $this->jokeyEffect * (1-($horse->strength *8/100)),2);
                         $horse->endurance = rand(10,100)/10;
+                        $horse->enduranceMeters = number_format(($horse->endurance * 100),0,'','');
                         $horse->distance = 0;
                         $this->data->horses[] = $horse;
+                       
                 }
                 return $this->data->horses;
                // return $this->insert_horses_db($this->data->horses);

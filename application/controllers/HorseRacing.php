@@ -43,7 +43,9 @@ class HorseRacing extends CI_Controller {
 				'limit' => 5
 			)
 		);
-
+		
+		$this->data->fastest = $this->race_model->getBestTime();
+	
 		$this->load->view('races', $this->data);
 	}
 

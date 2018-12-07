@@ -3,11 +3,12 @@
 class Race_model extends CI_Model {
 
 
-        public $data;
+    public $data;
         public $trackLength = 1500; // meters 
         public $advanceTime = 10; //seconds
         public $raceLimit = 3; // concurrent race limit
-
+        public $horsesAtFinish = 0;
+        public $horseSpeed = 0;
 
         public function __construct()
         {
@@ -21,30 +22,58 @@ class Race_model extends CI_Model {
             $races = $this->get_races(array(
                 'where' => array(
                     'in_progress' => true)
-                )
-            );
+            )
+        );
 
             foreach ($races as $race) {
-                $advanceTime = $this->advanceTime;
+
 
                 foreach ($race->horses as $horse) {
+                    $advanceTime = $this->advanceTime;
+                    $this->horseSpeed = $horse->speed;
+
                     if($horse->distance < $this->trackLength){
-                        if($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){
-                            $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
+                        if($horse->enduranceMeters < $race->time * $horse->speed ){ // has endurance{
+                            $this->horseSpeed = $horse->speedWithJokey;
+                        }
+
+
+                        if( ($horse->distance + $this->horseSpeed * $advanceTime) >= $this->trackLength){ // passas the finish line
+
+                            $advanceTime = ($this->trackLength - $horse->distance)/$this->horseSpeed;
                             $horse->raceCompleteTiming = $race->time+$advanceTime;
-                            $horse->distance += $horse->speedWithJokey * $advanceTime;
+                            $horse->distance = $this->trackLength;
+                            $race->horsesAtFinish++;
+
 
                         }else{ 
                             $advanceTime = $this->advanceTime;
-                            $horse->distance += $horse->speedWithJokey * $advanceTime;
+
+                            $horse->distance += $this->horseSpeed * $advanceTime;
+                            if($horse->distance >= $this->trackLength){
+                                //$horse->raceCompleteTiming = $race->time+$advanceTime;
+                                //$horse->distance = $this->trackLength;
+                                //$race->horsesAtFinish++; 
+                            }
+
+                            $horse->enduranceMeters-= $this->horseSpeed * $advanceTime;
 
                         }
+                        print_r($race->horsesAtFinish);
 
-                    }else{
+
+                        $race->time+= $advanceTime;
 
                     }
+                    if($race->horsesAtFinish == 8){
+                        $race->in_progress = 0;
+                    }
+
                 }
-                $race->time+= $this->advanceTime;
+
+
+
+
                 /*foreach ($race->horses as $horse) {
                     if ($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){ //if passas finish line shorter than 10 seconds
                         $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
@@ -64,13 +93,14 @@ class Race_model extends CI_Model {
                 */
             }
 
+
             $this->update_races($races);
 
             return $this->get_races(array(
                 'where' => array(
                     'in_progress' => true)
-                )
-            );
+            )
+        );
 
             
 
@@ -79,11 +109,11 @@ class Race_model extends CI_Model {
 
         public function create_race($horses){
             $count = $this->get_races(array(
-                 'where' => array(
-                    'in_progress' => true
-                ),
-                'count' => true)
-            );
+               'where' => array(
+                'in_progress' => true
+            ),
+               'count' => true)
+        );
 
             if($count>=3){
                 die ("Reached to race limit");
@@ -144,6 +174,23 @@ class Race_model extends CI_Model {
                 
             }
             return $races;
+        }
+
+        public function getBestTime(){
+            $races =  $this->get_races(array(
+                'where' => array(
+                    'in_progress' => false)
+                )
+            );
+            $fastest = $races[0]->horses[0];
+            foreach ($races as $race) {
+                foreach ($race->horses as $horse) {
+                    if($horse->raceCompleteTiming < $fastest->raceCompleteTiming)
+                        $fastest = $horse;
+                }
+                
+            }
+            return $fastest;
         }
 
         public function sort_distance($a, $b){
