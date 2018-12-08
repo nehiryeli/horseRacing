@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 07, 2018 at 08:10 PM
+-- Generation Time: Dec 08, 2018 at 08:28 PM
 -- Server version: 5.7.23
 -- PHP Version: 7.2.10
 
@@ -19,8 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `horse_racing`
 --
-CREATE DATABASE IF NOT EXISTS `horse_racing` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `horse_racing`;
 
 -- --------------------------------------------------------
 
@@ -31,7 +29,7 @@ USE `horse_racing`;
 DROP TABLE IF EXISTS `races`;
 CREATE TABLE `races` (
   `race_id` int(10) UNSIGNED NOT NULL,
-  `time` decimal(10,0) UNSIGNED NOT NULL,
+  `time` float(4,1) UNSIGNED NOT NULL,
   `winner` int(11) DEFAULT NULL,
   `horses` json NOT NULL,
   `horsesAtFinish` int(11) NOT NULL,
