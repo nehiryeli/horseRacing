@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<div class="container">
 		<?php if(isset($fastest)): ?>
 			<strong>Best Time</strong>
-			<?php echo number_format($fastest->raceCompleteTiming, 0) ?> seconds<br>
+			<?php echo number_format($fastest->raceCompleteTiming, 1) ?> seconds<br>
 			<strong>Best Horse</strong>
 			<ul>
 				
@@ -57,7 +57,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </div>
 
 <?php if(!empty($lastFiveRace)): ?>
-	<div class="container"><h1>Last Five Races</h1>
+	<div class="container"><h1>Last <?=sizeof($lastFiveRace) ?> Races</h1>
 		<?php foreach ($lastFiveRace as $race): ?>
 			<strong>Total Race Time: </strong> <?php echo $race->time ?> seconds<br>
 			<?php for ($i = 0; $i < 3; $i++) :?>
@@ -68,7 +68,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						<li><strong>Speed: </strong><?php echo $race->horses[$i]->speed  ?></li>
 						<li><strong>Strentgh: </strong><?php echo $race->horses[$i]->strength; ?></li>
 						<li><strong>Endurance: </strong><?php echo $race->horses[$i]->endurance ?></li>
-						<li><strong>Duration:</strong><?php echo number_format($race->horses[$i]->raceCompleteTiming, 0) ?> seconds</li>
+						<li><strong>Duration:</strong><?php echo number_format($race->horses[$i]->raceCompleteTiming, 1) ?> seconds</li>
 
 					</ul>				
 				</div>

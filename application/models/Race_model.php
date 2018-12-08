@@ -18,105 +18,62 @@ class Race_model extends CI_Model {
 
         }
 
-        public function advance_race(){
-            $races = $this->get_races(array(
-                'where' => array(
-                    'in_progress' => true)
-            )
-        );
+        public function advance_race2(){
+            $races = $this->get_races(
+                array(
+                    'where' => array(
+                        'in_progress' => true)
+                )
+            );
 
-            foreach ($races as $race) {
-
-
-                foreach ($race->horses as $horse) {
-                    $advanceTime = $this->advanceTime;
-                    $this->horseSpeed = $horse->speed;
-
-                    if($horse->distance < $this->trackLength){
-                        if($horse->enduranceMeters < $race->time * $horse->speed ){ // has endurance{
-                            $this->horseSpeed = $horse->speedWithJokey;
-                        }
-
-
-                        if( ($horse->distance + $this->horseSpeed * $advanceTime) >= $this->trackLength){ // passas the finish line
-
-                            $advanceTime = ($this->trackLength - $horse->distance)/$this->horseSpeed;
-                            $horse->raceCompleteTiming = $race->time+$advanceTime;
-                            $horse->distance = $this->trackLength;
-                            $race->horsesAtFinish++;
-
-
-                        }else{ 
-                            $advanceTime = $this->advanceTime;
-
-                            $horse->distance += $this->horseSpeed * $advanceTime;
-                            if($horse->distance >= $this->trackLength){
-                                //$horse->raceCompleteTiming = $race->time+$advanceTime;
-                                //$horse->distance = $this->trackLength;
-                                //$race->horsesAtFinish++; 
-                            }
-                            if($horse->enduranceMeters){
-                                $horse->enduranceMeters-= $this->horseSpeed * $advanceTime;
-                                if ($horse->enduranceMeters< 0)
-                                    $horse->enduranceMeters = 0;
-                            }
+            foreach ($races as $race) { // loop  all active races
+                foreach ($race->horses as $horse) { // loop all horses for all active races
+                   
+                    (!isset($horse->raceCompleteTiming)) ? $horse->raceCompleteTiming = 0: $horse->raceCompleteTiming; // init timing 0 for start
+                    for ($i = 0; $i < $this->advanceTime; $i++) { // advence race for spefied time
+                        if($horse->distance < $this->trackLength){ // if horse is not already at finish line
+                            if($horse->enduranceMeters > $horse->speed){ //check horse if it has enough endurance
+                                $horse->enduranceMeters -= $horse->speed; 
+                               $horseRealSpeed = $horse->speed;
+                            }else{ // horse hasn't enough endurance, jokey weight will apply 
+                            $horseRealSpeed = $horse->speedWithJokey; 
+                        } 
+                        //$horse->distance += $horseRealSpeed;
+                        //$horse->raceCompleteTiming += 1; 
+                            if($horse->distance+$horseRealSpeed >= $this->trackLength){ //check again if horse arrives at finish line
+                                $finishLineTime = ($horse->distance + $horseRealSpeed - $this->trackLength)/$horseRealSpeed; // its lesser than a second so lets calculate it
+                                $horse->distance = $this->trackLength;
+                                $horse->raceCompleteTiming += $finishLineTime;
+                                $race->horsesAtFinish ++;
+                                if($race->horsesAtFinish == 8){ // better to get this from var
+                                    $this->advanceTime = $finishLineTime; // it's lesser than advanceTime 
                             
-
+                                  
+                                }
+                            }else{ // not arrived to finish line yet
+                                $horse->distance += $horseRealSpeed;
+                                $horse->raceCompleteTiming += 1; // advance by 1 sec
+                            }
                         }
-                        print_r($race->horsesAtFinish);
-
-
-                        $race->time+= $advanceTime;
-
                     }
-                    if($race->horsesAtFinish == 8){
-                        $race->in_progress = 0;
-                    }
-
                 }
-
-
-
-
-                /*foreach ($race->horses as $horse) {
-                    if ($horse->speedWithJokey * $advanceTime + $horse->distance > $this->trackLength){ //if passas finish line shorter than 10 seconds
-                        $advanceTime = ($this->trackLength - $horse->distance)/$horse->speedWithJokey;
-                        $horse->timeToComplete = $advanceTime;
-                        //$race->in_progress = 0;
-                      
-                    }
-                    
-
+                $race->time += $this->advanceTime; // advance time 
+                if($race->horsesAtFinish == 8){ //check if all horses at finish line
+                 
+                    $race->in_progress = 0;
                 }
-                foreach ($race->horses as $horse) {
-                    $horse->distance += $horse->speedWithJokey * $advanceTime;
-
-                }
-                $race->time += $advanceTime;
-              
-                */
             }
-
-
             $this->update_races($races);
-
-            return $this->get_races(array(
-                'where' => array(
-                    'in_progress' => true)
-            )
-        );
-
-            
-
-
         }
+
+ 
 
         public function create_race($horses){
             $count = $this->get_races(array(
-             'where' => array(
+               'where' => array(
                 'in_progress' => true
             ),
-             'count' => true)
+               'count' => true)
         );
 
             if($count>=3){
