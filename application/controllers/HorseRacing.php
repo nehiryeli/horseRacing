@@ -10,7 +10,7 @@ class HorseRacing extends CI_Controller {
 		$this->load->model('horse_model');
 		$this->load->model('race_model');
 		$this->data = new stdClass();
-		$this->output->enable_profiler(TRUE);
+		//$this->output->enable_profiler(TRUE);
 
 	}
 	public function index(){
