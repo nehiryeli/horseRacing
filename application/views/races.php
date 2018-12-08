@@ -11,8 +11,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body>
 	<div class="container">
 		<div class="row">
-			<a class="btn btn-default" href="create-race">Create Race</a>
-			<a class="btn btn-default" href="advance">Progress</a>
+			<a class="btn btn-primary" href="create-race">Create Race</a>
+			<a class="btn btn-success" href="advance">Progress</a>
 		</div>
 	</div>
 
