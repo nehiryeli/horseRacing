@@ -19,7 +19,7 @@ class Race_model extends CI_Model {
         }
 
         public function advance_race(){
-            $races = $this->get_races(
+            $races = $this->get_races( 
                 array(
                     'where' => array(
                         'in_progress' => true)
